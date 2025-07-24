@@ -21,7 +21,7 @@ const Home = () => {
       <TaskForm onTaskAdded={fetchTasks} />
       <div className="grid gap-4 md:grid-cols-2">
         {tasks.map((task) => (
-          <TaskCard key={task._id} task={task} />
+          <TaskCard key={task._id} task={task} onTaskUpdate={fetchTasks} />
         ))}
       </div>
     </div>
