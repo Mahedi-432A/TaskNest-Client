@@ -1,42 +1,37 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import * as authApi from '../api/authApi'
-import { useAuth } from '../context/AuthContext'
-
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { registerUser } from "../utils/api";
 
 export default function Register() {
-const [name, setName] = useState('')
-const [email, setEmail] = useState('')
-const [password, setPassword] = useState('')
-const [error, setError] = useState(null)
-const navigate = useNavigate()
-const { login } = useAuth()
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-async function handleSubmit(e) {
-e.preventDefault()
-try {
-const data = await authApi.register({ name, email, password })
-login(data)
-navigate('/dashboard', { replace: true })
-} catch (err) {
-console.error(err)
-setError('Registration failed')
-}
-}
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await registerUser(formData);
+      localStorage.setItem("token", res.data.token); // token save
+      navigate("/dashboard"); // redirect
+    } catch (err) {
+      setError(err.response?.data?.message || "Registration failed");
+    }
+  };
 
-
-return (
-<div className="max-w-md mx-auto p-6 border rounded">
-<h1 className="text-2xl font-bold mb-4">Register</h1>
-<form onSubmit={handleSubmit} className="space-y-3">
-<input className="w-full p-2 border rounded" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required />
-<input className="w-full p-2 border rounded" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-<input className="w-full p-2 border rounded" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-{error && <p className="text-red-600 text-sm">{error}</p>}
-<button className="w-full p-2 bg-green-600 text-white rounded" type="submit">Create account</button>
-</form>
-<p className="text-sm mt-3">Already have an account? <Link className="text-blue-600" to="/login">Login</Link></p>
-</div>
-)
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-96">
+        <h2 className="text-2xl font-bold mb-4">Register</h2>
+        {error && <p className="text-red-500">{error}</p>}
+        <input type="text" name="name" placeholder="Name" onChange={handleChange} className="w-full p-2 border mb-2" />
+        <input type="email" name="email" placeholder="Email" onChange={handleChange} className="w-full p-2 border mb-2" />
+        <input type="password" name="password" placeholder="Password" onChange={handleChange} className="w-full p-2 border mb-2" />
+        <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Register</button>
+      </form>
+    </div>
+  );
 }
